@@ -1,0 +1,90 @@
+/*@import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);*/
+/*@import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);*/
+/*@import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);*/
+
+body { font-family: 'Droid Serif'; }
+/*h1, h2, h3 {*/
+	/*[>font-family: 'Yanone Kaffeesatz';<]*/
+	/*font-weight: normal;*/
+/*}*/
+
+/*.remark-slide-content {*/
+        /*font-family: 'Roboto', sans-serif;*/
+/*}*/
+
+@font-face {
+ font-family: "DjvuSansMono";
+ src: url("./DejaVuSansMono.ttf");
+}
+
+.remark-code, .remark-inline-code { 
+	font-family: 'DjvuSansMono'
+}
+
+.remark-slide .title h2 {
+	font-size: 30px;
+}
+
+.remark-slide h2 {
+	font-size: 20px;
+}
+
+.remark-slide h1 {
+	margin-top: 0;
+}
+
+
+.fsmall {
+	font-size: 75%;
+}
+
+.it {
+	font-style: italic;
+}
+
+.def {
+	font-style: italic;
+}
+
+.fitimg img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+.f75img img {
+	max-width: 75%;
+}
+
+.sub {
+	font-size: .83em;
+	vertical-align: sub;
+}
+
+.sup {
+	font-size: .83em;
+	vertical-align: super;
+}
+
+
+.left {
+	float: left;
+	margin-right: 2em;
+}
+
+.right {
+	float: right;
+	margin-left: 2em;
+}
+
+.clear {
+	clear: both;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+    padding: 5px;
+}
