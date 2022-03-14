@@ -222,6 +222,106 @@ SEGV???
 https://wiki.openjdk.java.net/display/HotSpot/Synchronization
 https://openjdk.java.net/jeps/374
 
+
+---
+polling_page = mmap()
+
+signal_handler() {
+	if (accessed(polling_page)) {
+		wait();
+	}
+}
+
+stop() {
+	*polling_page;
+	return false;
+}
+
+wait() {
+	mutex_lock(&m);
+	++cnt;
+	notify(cnt);
+	while (need_stop) {
+		wait(&m);
+	}	
+	mutex_unlock(&m);
+}
+
+---
+
+do_stop() {
+	mprotect(polling_page, PROT_NONE);
+}
+
+wait_all_threads() {
+	while (cnt < all_threads_n) {
+		wait(cnt);
+	}
+
+	...
+
+	need_stop = false
+	notify(m);
+}
+	
+
+
+switch() {
+  case invoke:
+	  if (stop()) {
+	     wait();
+	  }
+  case j.. : // target < bc
+         if (stop()) 
+
+}
+
+
+
+int a() {
+	b(1, 2, 3);
+}
+
+
+push 1
+push 2
+push 3
+invokestatic b
+
+
+class C { 
+	public synchronized void f() {
+		g()
+	
+	}
+
+	public synchronized void g() {
+	
+	}
+
+	public static synchronized void h() {
+	
+	}
+
+
+	public void g() {
+		synchronized (this) { 
+			...
+			if (...) {
+				return
+			}
+		}
+	
+
+		monitorenter this // mutex
+		... 
+		monitorexit this
+	}
+}
+
+java.lang.Integer ~~ intkj
+---
+
     </textarea>
     <script src="slides.js" type="text/javascript"></script>
   </body>
