@@ -11,24 +11,55 @@
 
 class: title, center, middle
 
-# Операционные системы и языки программирования
+# Операционные системы и реализация языков программирования
 
 ---
+# Ссылки
 
-Языки программирования и компиляторы
-https://www.youtube.com/playlist?list=PLlb7e2G7aSpSnNLNWqF46tPQ_wAXqLMNC
-https://compscicenter.ru/courses/compilers/2013-autumn/
+Дмитрий Булычев, Языки программирования и компиляторы
+* https://www.youtube.com/playlist?list=PLlb7e2G7aSpSnNLNWqF46tPQ_wAXqLMNC
+* https://compscicenter.ru/courses/compilers/2013-autumn/
 
-http://salishev.road2web.com/dokuwiki/doku.php/%D1%81%D1%82%D1%83%D0%B4%D0%B5%D0%BD%D1%82%D0%B0%D0%BC:%D1%81%D1%82%D1%83%D0%B4%D0%B5%D0%BD%D1%82%D0%B0%D0%BC
+Олег Плисс, Виртуальные машины
+* https://www.youtube.com/watch?v=f0do1-WXYRc
+
+Сергей Салищев, Разработка сред управляемого исполнения на примере виртуальной машины Java
+* http://salishev.road2web.com/dokuwiki/doku.php/%D1%81%D1%82%D1%83%D0%B4%D0%B5%D0%BD%D1%82%D0%B0%D0%BC:%D1%81%D1%82%D1%83%D0%B4%D0%B5%D0%BD%D1%82%D0%B0%D0%BC
 
 ---
 # Java
 
-Java SE: https://docs.oracle.com/javase/specs/
+Java SE: https://docs.oracle.com/en/java/javase/19/docs/specs/index.html
 
 OpenJDK: https://openjdk.java.net/
 
+* .java
+* .class
+* .jar
+* `<clinit>`
+* class loading
+	* ClassLoader
+
+--
+
+Sheng Liang and Gilad Bracha, Dynamic Class Loading in the Java Virtual Machine, 
+* features: 
+	* lazy loading
+	* type-safe linkage
+	* user-defineable class loading policy
+	* mulitple namespaces
+* applications:
+	* class reloading/unloading
+	* bytecode transformation
+
+--
+
+```
+java HelloWorld.java
+```
+
 ---
+
 
 # Java Bytecode
 
@@ -38,13 +69,6 @@ Stack VM
   * args vs locals
   * стек возврата?..
 
-Dynamic Class Loading in
-the Java Virtual Machine by Sheng Liang and Gilad Bracha (Proceedings of the 1998
-ACM SIGPLAN Conference on Object-Oriented Programming Systems, Languages and
-Applications).
-* transformation
-* unloading
-* multiple instances of the app
 
 ---
 # Threading
@@ -521,6 +545,10 @@ https://pdfs.semanticscholar.org/a9e4/e416ec33e0b382fe264acbf409cb2fc4789f.pdf
 Kotzmann, Wimmer - Design of the Java HotSpot™ client compiler for Java 6
 
 https://dl.acm.org/doi/pdf/10.1145/1369396.1370017
+
+https://www.oracle.com/technetwork/java/javase/tech/3198-d1-150056.pdf
+
+https://ssw.jku.at/Research/Papers/Wimmer04Master/Wimmer04Master.pdf
 
 ---
 # Range check elimination
