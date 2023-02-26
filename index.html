@@ -29,7 +29,7 @@ class: title, center, middle
 ---
 # Java
 
-Java SE: https://docs.oracle.com/en/java/javase/19/docs/specs/index.html
+Java SE: https://docs.oracle.com/en/java/javase/17/docs/specs/index.html
 
 OpenJDK: https://openjdk.java.net/
 
@@ -38,19 +38,19 @@ OpenJDK: https://openjdk.java.net/
 * .jar
 * `<clinit>`
 * class loading
-	* ClassLoader
+    * ClassLoader
 
 --
 
 Sheng Liang and Gilad Bracha, Dynamic Class Loading in the Java Virtual Machine, 
 * features: 
-	* lazy loading
-	* type-safe linkage
-	* user-defineable class loading policy
-	* mulitple namespaces
+    * lazy loading
+    * type-safe linkage
+    * user-defineable class loading policy
+    * mulitple namespaces
 * applications:
-	* class reloading/unloading
-	* bytecode transformation
+    * class reloading/unloading
+    * bytecode transformation
 
 --
 
@@ -59,150 +59,220 @@ java HelloWorld.java
 ```
 
 ---
-
-
 # Java Bytecode
 
-Stack VM
+```
+javap HelloWorld
+```
 
+Stack VM: https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-2.html#jvms-2.5
+* frame: locals, operand stack, constant pool, _impl-specific info_
 * `invoke*`
-  * args vs locals
-  * стек возврата?..
+    * переданные аргументы становятся локалами
+    * стек возврата?..
 
+--
+<!-- -->
+
+add:
+* https://docs.oracle.com/javase/specs/jvms/se17/html/jvms-6.html#jvms-6.5.iadd
+* https://github.com/openjdk/jdk17u-dev/blob/master/src/hotspot/cpu/x86/templateTable_x86.cpp#L1342
 
 ---
 # Threading
 
-* https://www.complang.tuwien.ac.at/forth/threaded-code.html
 * http://www.cs.toronto.edu/~matz/dissertation/matzDissertation-latex2html/node6.html
 * https://wiki.c2.com/?DirectThreadedCode
+* https://www.complang.tuwien.ac.at/forth/threaded-code.html
 
-Call Threaded
-Direct Threaded
-Indirect Threaded
-Token Threaded
+## Switch Dispatch
+```
+"A" <- ip
+"B"
+"C"
+
+switch (*ip++) {
+case A:
+        ...
+case B:
+        ...
+}
+```
+
+## Subroutine Threaded
+
+```
+call A()
+call B()
+call C()
+```
+---
+
+## Direct Threaded
+
+```
+A <- ip
+B 
+C
+
+next:
+        ld r0, [ip]
+        add ip, ip, 4
+        jmp r0
+```
+--
+ ---
+
+```
+A:                              A: 
+        ...                             ...
+next:                                   jmp next
+        ld r0, [ip]             B:
+        add ip, ip, 4                   ... 
+        jmp r0                          jmp next
+B:                              next:
+        ...                             ld r0, [ip]
+next:                                   add ip, ip, 4
+        ld r0, [ip]                     jmp r0
+        add ip, ip, 4
+        jmp r0
+
+```
+---
+
+## Indirect Threaded
+
+```
+A       { A, a } 
+B       { A, b }
+
+next:
+        ld r0, [ip]
+        add ip, ip, 4
+        ld r1, [r0 + 4]
+        ld r0, [r0]
+        jmp r0
+```
+
+--
+
+## Token Threaded
+
+```
+A       "A"
+B       "B"
+```
+
+## Bytecode
+sizeof(token) == 1
 
 ---
-```c
-int sp;
-int stack[];
-int tos;
+# 
+https://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
 
-void push(int v) {
-	stack[++sp] = v;
-}
-int pop() {
-	return stack[sp--];
+```
+table[] = {
+    &&A,
+    &&B,
 }
 
-int insn;
-1:
-while ((insn = *pc++)) {
-	switch (insn) {
-	case ADD:
-		int a = pop();
+#define NEXT() goto *table[*ip++]
 
-	case ADD_TOS:
-		int b = pop();
-		tos = tos + b;
-
-
-		// option 1: threaded code
-		void* pc;
-		fn = *pc++;
-
-		// option 2: byte code
-		char* pc;
-		rbx = *bcp;
-		++bcp;
-		fn = table_tos[*pc++];
-
-		jmp fn;
-	case SUB:
-		...
-		break;
-
-	case INVOKE_NOTOS:
-		push(tos);
-	case INVOKE:
-		...
-	}
+switch (*ip++) {
+case A:
+        ...
+        NEXT()
+case B:
+        ...
+        NEXT()
 }
 ```
-
-table_tos[] {
-	ADD_TOS,
-	SUB_TOS,
-	INVOKE_NOTOS,
-}
-
-table[] {
-	ADD,
-	SUB,
-	INVOKE,
-}
-
- ---
-```c
-
-while (1) {
-	case ADD:
-		...
-		goto *pc++
-		break;
-	case SUB:
-		goto *pc++
-		break;
-	}
-}
-```
-
-prog:
-0xfff1...
-0xfff2...
-
- |
- v
-
-table:
-13: 0xfff1
-15: 0xfff2
-
-prog:
-13
-15
-
-0xfff1:
-	pop %rax
-	pop %rbx
-	add %rax, %rbx
-	push %rax
-	// dsp
-	movb (vip), %cl
-	fn = *(table + cl) // 0xfff2
-	jmp *fn
 
 ---
 # Interpreter
 
-* Customer assembler
-  * Dynamic CPU optimizations
-  * Label implementation
 * Template Interpreter
-  * Top-of-Stack optimization
+    * `Assembler`
+        * `Label`
+    * `MacroAssember`, оптимальная реализация операций
+    * Кеширование Top-of-Stack
 
+
+---
+# ToS
+
+```c
+table_tos[] { ADD_TOS, SUB_TOS, INVOKE_NOTOS, }
+table[]     { ADD,     SUB,     INVOKE,       }
+
+int sp, stack[];
+int tos;
+
+        switch (insn) {
+        case ADD:
+                tos = pop();
+        case ADD_TOS:
+                int b = pop();
+                tos = tos + b;
+
+                // NEXT
+                jmp *table_tos[*ip++];
+
+        case INVOKE_NOTOS:
+                push(tos);
+        case INVOKE:
+                ...
+
+```
+
+---
+# Invoke (not actual)
+
+```asciidrawing
+a
+b
+ret addr       // rbp
+// frame local data
+l3
+l4
+|            
+v              // rsp, operand stack
+```
+--
  ---
-https://www.gaeblogx.com/assets/Interpreter-Optimization-interp.pdf 
-* superinstructions
+```
+a
+b
 
- ---
 
-* `Assembler`
-* `MacroAssember`
-* ...
+-
+ret addr       // rbp
+// frame local data
+l3
+l4
+|            
+v              // operand stack
 
-for (int i = 0; i < 50000; ++i) {
-}
+
+-              // rsp, frame footer, or alignment requirement 
+               // -- there are such actual impls :)
+```
+
+
+
+---
+# Bytecode Rewrite
+
+* `aload_[0-3]` (1 байт) vs 
+* `aload N` (2 байтa)
+
+Rewrite:
+* `getfield` -> `fast_getfield`
+* `_aload_0` + `_fast_igetfield` -> `fast_access`
+
+Superinstructions, https://www.gaeblogx.com/assets/Interpreter-Optimization-interp.pdf 
+
+Примитивный JIT
 
 ---
 # GC
@@ -251,50 +321,50 @@ https://openjdk.java.net/jeps/374
 polling_page = mmap()
 
 signal_handler() {
-	if (accessed(polling_page)) {
-		wait();
-	}
+        if (accessed(polling_page)) {
+                wait();
+        }
 }
 
 stop() {
-	*polling_page;
-	return false;
+        *polling_page;
+        return false;
 }
 
 wait() {
-	mutex_lock(&m);
-	++cnt;
-	notify(cnt);
-	while (need_stop) {
-		wait(&m);
-	}	
-	mutex_unlock(&m);
+        mutex_lock(&m);
+        ++cnt;
+        notify(cnt);
+        while (need_stop) {
+                wait(&m);
+        }       
+        mutex_unlock(&m);
 }
 
 ---
 
 do_stop() {
-	mprotect(polling_page, PROT_NONE);
+        mprotect(polling_page, PROT_NONE);
 }
 
 wait_all_threads() {
-	while (cnt < all_threads_n) {
-		wait(cnt);
-	}
+        while (cnt < all_threads_n) {
+                wait(cnt);
+        }
 
-	...
+        ...
 
-	need_stop = false
-	notify(m);
+        need_stop = false
+        notify(m);
 }
-	
+        
 
 
 switch() {
   case invoke:
-	  if (stop()) {
-	     wait();
-	  }
+          if (stop()) {
+             wait();
+          }
   case j.. : // target < bc
          if (stop()) 
 
@@ -303,7 +373,7 @@ switch() {
 
 
 int a() {
-	b(1, 2, 3);
+        b(1, 2, 3);
 }
 
 
@@ -314,33 +384,33 @@ invokestatic b
 
 
 class C { 
-	public synchronized void f() {
-		g()
-	
-	}
+        public synchronized void f() {
+                g()
+        
+        }
 
-	public synchronized void g() {
-	
-	}
+        public synchronized void g() {
+        
+        }
 
-	public static synchronized void h() {
-	
-	}
+        public static synchronized void h() {
+        
+        }
 
 
-	public void g() {
-		synchronized (this) { 
-			...
-			if (...) {
-				return
-			}
-		}
-	
+        public void g() {
+                synchronized (this) { 
+                        ...
+                        if (...) {
+                                return
+                        }
+                }
+        
 
-		monitorenter this // mutex
-		... 
-		monitorexit this
-	}
+                monitorenter this // mutex
+                ... 
+                monitorexit this
+        }
 }
 
 java.lang.Integer ~~ intkj
@@ -355,27 +425,27 @@ Chandler Carruth - Understanding Compiler Optimization
 * Inlining
 * Loop unrolling
 * Memory ops
-	     
+             
 ---
 fn(int *a, int b):
-	*a = 1 + b + 2 + c + 3 + d + 4 // b + c + d + 1 + 2 + 3 + 4
+        *a = 1 + b + 2 + c + 3 + d + 4 // b + c + d + 1 + 2 + 3 + 4
 
 ...
 
 =
-	a
-	+
-		1
-		+
-			b
-			2
+        a
+        +
+                1
+                +
+                        b
+                        2
 =
-	a
-	+
-		b
-		+
-			1
-			2
+        a
+        +
+                b
+                +
+                        1
+                        2
 
 
 ...
@@ -388,44 +458,44 @@ a = t1 + 2
 ...
 
 canon(node):
-	switch (node)
-	case '+':
-		if (const(left(node)) && plus(right(node)))
-			return plus(left(right(node)), plus(left(node), right(right(node))))
+        switch (node)
+        case '+':
+                if (const(left(node)) && plus(right(node)))
+                        return plus(left(right(node)), plus(left(node), right(right(node))))
 
 
 tr
 while ((newtr = canon(tr)))
-	tr = newtr
+        tr = newtr
 
 ...
 
 codegen(node):
-	l = codegen(left(node))
-	r = codegen(right(node))
-	switch (node):
-	case '=';
-		emit("st %s %s", l, r)
-	case '+':
-		if (b == 1)
-			emit("inc %s", r)
-		elseif (a == 1)
-			emit("inc %s", l)
-		else
-			emit("add %s %s", l, r)
-	...
+        l = codegen(left(node))
+        r = codegen(right(node))
+        switch (node):
+        case '=';
+                emit("st %s %s", l, r)
+        case '+':
+                if (b == 1)
+                        emit("inc %s", r)
+                elseif (a == 1)
+                        emit("inc %s", l)
+                else
+                        emit("add %s %s", l, r)
+        ...
 
 ...
 
 opt(node):
-	a = opt(left(node))
-	b = opt(right(node))
-	switch (node):
-	case '+':
-		if const(a) && const(b):
-			return const(a + b)
-	...
-	return node
+        a = opt(left(node))
+        b = opt(right(node))
+        switch (node):
+        case '+':
+                if const(a) && const(b):
+                        return const(a + b)
+        ...
+        return node
 
 ...
 
@@ -440,40 +510,40 @@ add ...
 st r1, [r0] // a <- b + 3
 ---
 fn(a, b):
-	return a + b
+        return a + b
 
 fn2():
-	fn(1, 2)
+        fn(1, 2)
 
 
 fn2:
 
 .
 call
-	fn
-	1
-	2
+        fn
+        1
+        2
 .
 +
-	1
-	2
+        1
+        2
 .
 3
 
 
 0xeeee: // fn2
-	mov r0, #1
-	mov r1, #2
-	call 0xffff
-	// ret r0 
+        mov r0, #1
+        mov r1, #2
+        call 0xffff
+        // ret r0 
 
 
 0xffff: // fn
-	add r0, r0, r1	
-	ret
+        add r0, r0, r1  
+        ret
 
 ...
-	mov r0, 3
+        mov r0, 3
 
 ---
 inter: 100ms
@@ -485,19 +555,19 @@ jit:  10ms + 10ms
 
 a = 0
 for (int i = 0; i < 1000; ++i) {
-	a += i
+        a += i
 }
 
 1000 * body + 1000 * cond
 ...
 
 for (int i = 0; i < 1000; i += 10) {
-	a += 0
-	a += 1
-	a += 2
-	a += 3
-	...
-	a += 9
+        a += 0
+        a += 1
+        a += 2
+        a += 3
+        ...
+        a += 9
 }
 
 1000 * body + 100 * cond
