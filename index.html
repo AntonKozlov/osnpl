@@ -148,7 +148,7 @@ B       { A, b }
 
 next:
         ld r0, [ip]
-        add ip, ip, 4
+        add ip, ip, 8
         ld r1, [r0 + 4]
         ld r0, [r0]
         jmp r0
@@ -231,7 +231,8 @@ int tos;
 ```asciidrawing
 a
 b
-ret addr       // rbp
+ret addr       
+// rbp
 // frame local data
 l3
 l4
@@ -280,17 +281,40 @@ Superinstructions, https://www.gaeblogx.com/assets/Interpreter-Optimization-inte
 The Garbage Collection Handbook
 https://gchandbook.org/
 
+## Ref Counting
+
+## Mark & Sweep
+
+---
+# Mark & Compact
+
+* Two-Finger
+  * fixed size
+* Lisp-2 
+  * compute and store forward pointers
+  * update references
+  * move
+* Threaded compaction
+
+
+---
+
+# Generational 
 https://medium.com/@MartinCracauer/generational-garbage-collection-write-barriers-write-protection-and-userfaultfd-2-8b0e796b8f7f
 
-* Ref Counting
-* Mark & Sweep
-* Mark & Compact
-* Generational 
-  * TLS
-  * NewGen
-  * Survivor
-  * OldGen
-* CMS: https://www.cs.purdue.edu/homes/hosking/ismm2000/papers/printezis.pdf
+* TLS
+* NewGen
+* Survivor
+* OldGen
+
+---
+# CMS
+
+https://www.cs.purdue.edu/homes/hosking/ismm2000/papers/printezis.pdf
+
+
+---
+
 * G1: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.63.6386&rep=rep1&type=pdf
 * C4/Shennandoah/ZGC
 
