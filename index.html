@@ -439,18 +439,91 @@ class C {
 
 java.lang.Integer ~~ intkj
 ---
-# JIT
-## General Opts
+# JIT 
 
-Chandler Carruth - Understanding Compiler Optimization
-* https://www.youtube.com/watch?v=FnGCDLhaxKU  
+Ссылки:
+* http://jeremymanson.blogspot.com/2011/04/cliff-click-in-jvm-does-what.html?m=1
+* https://www.cs.purdue.edu/homes/hosking/661-12/jf12_AJVMDoesWhat.pdf
+* https://www.slideshare.net/CharlesNutter/redev-2011-jvm-jit-for-dummies-what-the-jvm-does-with-your-bytecode-when-youre-not-looking
+* https://github.com/openjdk/jdk/blob/master/src/hotspot/share/code/dependencies.hpp#L112
 
- ---
-* Inlining
-* Loop unrolling
-* Memory ops
+Chandler Carruth - Understanding Compiler Optimization: https://www.youtube.com/watch?v=FnGCDLhaxKU  
+  * Inlining
+  * Memory ops
+  * Loop unrolling
+
+
+---
+# JIT vs AOT (classic)
+
+* When to compile
+  * Invocation count
+  * On Stack Replacement
+* What to compile
+  * code cache is short
+* Quality / speed tradeoff
+
+```
+int: 100ms
+jit': 1s (comp) + 1ms (int)
+jit:  10ms + 10ms
+```
+
+Problems:
+ * Start-up
+ * Warm-up
+
+<!--
+
+a = 0
+for (int i = 0; i < 1000; ++i) {
+        a += i
+}
+
+1000 * body + 1000 * cond
+...
+
+for (int i = 0; i < 1000; i += 10) {
+        a += 0
+        a += 1
+        a += 2
+        a += 3
+        ...
+        a += 9
+}
+
+1000 * body + 100 * cond
+-->
+
+---
+# Lifecycle
+
+* Compilation:
+	* vm state
+	* profile
+* Deoptimization
+	* not entrant
+	* zombie
+* Reclaimation
+  * zombie
+  * cold methods (code cache is short)
+
+Optimistic optimizations, fail:
+ * reinterpret
+ * not entrant
+
+
+---
+# Inlining (devirtualization)
+
+* `final class`
+* guarded CHA
+* Inline cache
+
+
              
 ---
+```
 fn(int *a, int b):
         *a = 1 + b + 2 + c + 3 + d + 4 // b + c + d + 1 + 2 + 3 + 4
 
@@ -569,62 +642,13 @@ call
 ...
         mov r0, 3
 
----
-inter: 100ms
-jit': 1s (comp)+ 1ms (runtime)
-jit:  10ms + 10ms
-
----
-
-
-a = 0
-for (int i = 0; i < 1000; ++i) {
-        a += i
-}
-
-1000 * body + 1000 * cond
-...
-
-for (int i = 0; i < 1000; i += 10) {
-        a += 0
-        a += 1
-        a += 2
-        a += 3
-        ...
-        a += 9
-}
-
-1000 * body + 100 * cond
-
----
-
-# AOT (classic) vs JIT
-
-* Quality / speed tradeoff
-* Select what to compile
-
-ссылки:
-* http://jeremymanson.blogspot.com/2011/04/cliff-click-in-jvm-does-what.html?m=1
-* https://www.cs.purdue.edu/homes/hosking/661-12/jf12_AJVMDoesWhat.pdf
-* https://www.slideshare.net/CharlesNutter/redev-2011-jvm-jit-for-dummies-what-the-jvm-does-with-your-bytecode-when-youre-not-looking
-* https://github.com/openjdk/jdk/blob/master/src/hotspot/share/code/dependencies.hpp#L112
-
-Trigger:
-* Invocation count
-* On Stack Replacement
+```
 
 ---
 # IR
 * Graph
 * Three-operand code
 * Single Statement Assignment
-
----
-# Inlining (devirtualization)
-
-* `final class`
-* guarded CHA
-* Inline cache
 
 ---
 # GVN
