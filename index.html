@@ -714,6 +714,68 @@ https://www.usenix.org/legacy/events/jvm01/full_papers/paleczny/paleczny.pdf
 
 https://github.com/true-grue/Compiler-Development/blob/master/docs/sea_of_nodes.md
 
+---
+# JMM
+
+http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
+
+https://gee.cs.oswego.edu/dl/jmm/cookbook.html
+
+https://preshing.com/20120913/acquire-and-release-semantics/
+* https://preshing.com/20120710/memory-barriers-are-like-source-control-operations/
+
+---
+# Graal VM
+
+http://lafo.ssw.uni-linz.ac.at/papers/2017_PLDI_GraalTutorial.pdf
+
+* D
+* C(D)
+* S(C, D) = C(D)()
+
+--
+## 1
+
+* INT(C, D)
+* S(INT, C) = f(D) -- скомп программа
+
+--
+## 2
+
+* S(S, INT) = f(C) -- комплиятор
+
+--
+## 3
+
+* S(S, S) = f(INT) -- генератором компляторов
+
+---
+# CRaC
+
+https://antonkozlov.github.io/joker2020-crac/
+
+---
+# JVMTI
+
+* Java Instrumentation
+	* redefine
+
+
+---
+# Java Profiling
+
+* instrumentation / sampling
+* microbenchmarking
+* Safepoint Bias
+	* Perf
+	* Async Profiler
+* eBPF ?
+
+---
+# Left Overs
+
+JNI
+
     </textarea>
     <script src="slides.js" type="text/javascript"></script>
   </body>
